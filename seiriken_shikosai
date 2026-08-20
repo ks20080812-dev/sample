@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>整理券システム プレビュー</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+  body { background-color: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
+  .app-container { width: 100%; max-width: 400px; background: #fff; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden; }
+  
+  /* ヘッダー */
+  .header { background: #06c755; color: white; padding: 16px; text-align: center; font-weight: bold; font-size: 1.1rem; }
+  
+  /* 呼び出しモニターエリア */
+  .status-board { background: #1e293b; color: white; padding: 20px; text-align: center; }
+  .status-title { font-size: 0.85rem; color: #94a3b8; margin-bottom: 5px; }
+  .current-number { font-size: 2.5rem; font-weight: bold; color: #38edf6; }
+  
+  /* メインコンテンツ */
+  .content { padding: 24px 20px; text-align: center; }
+  .ticket-card { background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+  .ticket-label { font-size: 0.9rem; color: #64748b; }
+  .ticket-number { font-size: 3rem; font-weight: bold; color: #0f172a; margin: 10px 0; }
+  .wait-info { font-size: 0.95rem; color: #475569; }
+  .wait-count { font-weight: bold; color: #e11d48; }
+
+  /* 操作ボタン */
+  .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.2s; }
+  .btn-primary { background: #06c755; color: white; margin-bottom: 10px; }
+  .btn-primary:hover { background: #05b34c; }
+  .btn-secondary { background: #e2e8f0; color: #475569; }
+  .btn-secondary:hover { background: #cbd5e1; }
+  
+  /* 管理者用デモ操作枠 */
+  .admin-panel { border-top: 1px solid #e2e8f0; padding: 15px; background: #f1f5f9; text-align: center; }
+  .admin-title { font-size: 0.75rem; color: #64748b; margin-bottom: 8px; font-weight: bold; }
+  .btn-admin { background: #64748b; color: white; padding: 6px 12px; font-size: 0.8rem; border: none; border-radius: 4px; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+  <div class="header">順番待ち整理券</div>
+  
+  <!-- 店舗モニター表示欄 -->
+  <div class="status-board">
+    <div class="status-title">ただいまのお呼び出し番号</div>
+    <div class="current-number" id="callingNo">005</div>
+  </div>
+
+  <div class="content">
+    <div class="ticket-card" id="ticketBox">
+      <div class="ticket-label">あなたの整理券番号</div>
+      <div class="ticket-number" id="myNo">---</div>
+      <div class="wait-info" id="waitText">下のボタンを押して整理券を取得してください</div>
+    </div>
+
+    <button class="btn btn-primary" onclick="issueTicket()" id="issueBtn">整理券を発行する</button>
+  </div>
+
+  <!-- デモ用の管理ボタン -->
+  <div class="admin-panel">
+    <div class="admin-title">【デモ用操作】店舗側のアクション</div>
+    <button class="btn-admin" onclick="nextCustomer()">次の番号を呼ぶ</button>
+  </div>
+</div>
+
+<script>
+  let currentCalling = 5;
+  let myTicket = null;
+  let lastIssued = 8;
+
+  function issueTicket() {
+    if (myTicket !== null) return;
+    lastIssued++;
+    myTicket = lastIssued;
+    document.getElementById('myNo').innerText = String(myTicket).padStart(3, '0');
+    document.getElementById('issueBtn').disabled = true;
+    document.getElementById('issueBtn').style.opacity = '0.5';
+    updateWaitStatus();
+  }
+
+  function nextCustomer() {
+    currentCalling++;
+    document.getElementById('callingNo').innerText = String(currentCalling).padStart(3, '0');
+    updateWaitStatus();
+  }
+
+  function updateWaitStatus() {
+    if (myTicket === null) return;
+    const waitingCount = myTicket - currentCalling;
+    
+    if (waitingCount > 0) {
+      document.getElementById('waitText').innerHTML = `あと <span class="wait-count">${waitingCount}</span> 組でお呼び出しです`;
+    } else if (waitingCount === 0) {
+      document.getElementById('waitText').innerHTML = `<span style="color:#06c755; font-weight:bold;">あなたの番です！受付へお越しください</span>`;
+    } else {
+      document.getElementById('waitText').innerText = `ご案内済みです`;
+    }
+  }
+</script>
+
+</body>
+</html>
